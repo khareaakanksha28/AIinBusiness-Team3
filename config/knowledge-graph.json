@@ -1,0 +1,169 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "lastUpdated": "2025-11-27",
+    "timeHorizon": {
+      "start": "2025-01-01T00:00:00Z",
+      "end": "2025-11-27T00:00:00Z",
+      "months": 11
+    },
+    "sites": {
+      "both": [],
+      "minneapolis": ["uuid-minneapolis-placeholder"],
+      "stcloud": ["uuid-stcloud-placeholder"]
+    }
+  },
+  "endpoints": {
+    "demandByFulfillmentDonut": {
+      "name": "Total Aggregate Demand",
+      "module": "Plan",
+      "page": "Projected Demand",
+      "description": "Shows total demand broken down into Firm Orders, Overdue Orders, and Forecasted Orders",
+      "visualization": {
+        "type": "donut",
+        "library": "recharts",
+        "component": "PieChart",
+        "centerMetric": "sum",
+        "dataKey": "value",
+        "nameKey": "name",
+        "colors": {
+          "Overdue": "#ef4444",
+          "Forecasted": "#3b82f6",
+          "Firm Order": "#22c55e"
+        }
+      },
+      "sampleQuestions": [
+        "What is the revenue from my total firm orders?",
+        "What is my total demand?",
+        "How much overdue demand do I have?",
+        "What is the value of my forecasted orders?"
+      ],
+      "inputs": {
+        "from": "2025-01-01T00:00:00Z",
+        "until": "2025-11-27T00:00:00Z",
+        "sites": [],
+        "onTimeDeliveryBuffer": 0.0,
+        "useProjectedCompletion": false
+      },
+      "queryTemplate": "query DonutDemand($simulation: UUID!, $sites: [UUID!]!, $from: Instant!, $until: Instant!, $onTimeDeliveryBuffer: Float!, $useProjectedCompletion: Boolean) { simulation(id: $simulation) { charts { demandByFulfillmentDonut(from: $from, until: $until, sites: $sites, onTimeDeliveryBuffer: $onTimeDeliveryBuffer, useProjectedCompletion: $useProjectedCompletion) { startDate stackDataList { name quantity value } } } } }",
+      "responseFormat": "single",
+      "extractionLogic": {
+        "firmOrder": "stackDataList[name='Firm Order'].value",
+        "overdue": "stackDataList[name='Overdue'].value",
+        "forecasted": "stackDataList[name='Forecasted'].value",
+        "total": "sum(stackDataList.value)"
+      }
+    },
+    "demandByFulfillmentHistogram": {
+      "name": "Monthly Aggregate Demand",
+      "module": "Plan",
+      "page": "Projected Demand",
+      "description": "Displays total monthly demand broken into Firm Orders, Overdue Orders, and Forecasted Orders",
+      "visualization": {
+        "type": "stacked-bar",
+        "library": "recharts",
+        "component": "BarChart",
+        "xAxisKey": "month",
+        "stackKeys": ["Overdue", "Firm Order", "Forecasted"],
+        "colors": {
+          "Overdue": "#ef4444",
+          "Forecasted": "#3b82f6",
+          "Firm Order": "#22c55e"
+        }
+      },
+      "sampleQuestions": [
+        "How many months do I have firm demand?",
+        "What is my average revenue per month?",
+        "Which month has the highest demand?",
+        "Show me monthly demand breakdown"
+      ],
+      "inputs": {
+        "periodBoundaries": "auto-generate-monthly",
+        "sites": [],
+        "onTimeDeliveryBuffer": 0.0,
+        "useProjectedCompletion": false
+      },
+      "queryTemplate": "query HistogramDemand($simulation: UUID!, $periodBoundaries: [Instant!]!, $sites: [UUID!]!, $onTimeDeliveryBuffer: Float!, $useProjectedCompletion: Boolean) { simulation(id: $simulation) { charts { demandByFulfillmentHistogram(periodBoundaries: $periodBoundaries, sites: $sites, onTimeDeliveryBuffer: $onTimeDeliveryBuffer, useProjectedCompletion: $useProjectedCompletion) { startDate stackDataList { name quantity value } } } } }",
+      "responseFormat": "array",
+      "extractionLogic": {
+        "monthsWithFirmOrders": "count(periods[stackDataList contains 'Firm Order'])",
+        "averageMonthlyRevenue": "average(periods.stackDataList.value)",
+        "highestDemandMonth": "max(periods by sum(stackDataList.value))"
+      }
+    },
+    "monthlyDemandByCategory": {
+      "name": "Monthly Demand by Category",
+      "module": "Plan",
+      "page": "Projected Demand",
+      "description": "Displays monthly demand broken down by selected category (Customer, Part, Platform, etc.)",
+      "visualization": {
+        "type": "stacked-bar",
+        "library": "recharts",
+        "component": "BarChart",
+        "xAxisKey": "month",
+        "stackKeys": "dynamic",
+        "colors": "auto-generate"
+      },
+      "sampleQuestions": [
+        "Which month has the most demand from a specific customer?",
+        "Show me demand by customer over time",
+        "What is the variation in part demand month to month?"
+      ],
+      "inputs": {
+        "periodBoundaries": "auto-generate-monthly",
+        "sites": [],
+        "stackType": "CUSTOMER",
+        "onTimeDeliveryBuffer": 0.0,
+        "useProjectedCompletion": false
+      },
+      "queryTemplate": "query MonthlyDemandByCategory($simulation: UUID!, $periodBoundaries: [Instant!]!, $sites: [UUID!]!, $stackType: StackType!, $onTimeDeliveryBuffer: Float!) { simulation(id: $simulation) { charts { demandByStackHistogram(periodBoundaries: $periodBoundaries, sites: $sites, stackType: $stackType, onTimeDeliveryBuffer: $onTimeDeliveryBuffer) { startDate stackDataList { name quantity value } } } } }",
+      "responseFormat": "array",
+      "extractionLogic": {
+        "topCategory": "stackDataList group by name, sort by sum(value) desc, take first",
+        "variation": "calculate std deviation by category across months"
+      }
+    }
+  },
+  "intentMapping": {
+    "keywords": {
+      "firm order": ["demandByFulfillmentDonut"],
+      "total demand": ["demandByFulfillmentDonut"],
+      "overdue": ["demandByFulfillmentDonut"],
+      "forecasted": ["demandByFulfillmentDonut"],
+      "revenue": ["demandByFulfillmentDonut", "demandByFulfillmentHistogram"],
+      "monthly": ["demandByFulfillmentHistogram", "monthlyDemandByCategory"],
+      "months": ["demandByFulfillmentHistogram"],
+      "average": ["demandByFulfillmentHistogram"],
+      "customer": ["monthlyDemandByCategory"],
+      "part": ["monthlyDemandByCategory"],
+      "category": ["monthlyDemandByCategory"]
+    },
+    "patterns": {
+      "total_aggregate": {
+        "pattern": "(what|show|tell).*(total|aggregate|overall).*(demand|revenue|orders)",
+        "endpoint": "demandByFulfillmentDonut"
+      },
+      "monthly_breakdown": {
+        "pattern": "(how many|which).*(month|monthly)",
+        "endpoint": "demandByFulfillmentHistogram"
+      },
+      "category_analysis": {
+        "pattern": ".*(customer|part|platform|category)",
+        "endpoint": "monthlyDemandByCategory"
+      }
+    }
+  },
+  "responseTemplates": {
+    "demandByFulfillmentDonut": {
+      "firmOrder": "Your total firm order revenue is ${value}",
+      "total": "Your total demand across all order types is ${value}",
+      "overdue": "You have ${value} in overdue orders",
+      "breakdown": "Your demand breakdown: Firm Orders: ${firmOrder}, Forecasted: ${forecasted}, Overdue: ${overdue}"
+    },
+    "demandByFulfillmentHistogram": {
+      "monthCount": "You have firm orders in ${count} out of ${total} months",
+      "average": "Your average monthly revenue is ${value}",
+      "highest": "Your highest demand month is ${month} with ${value}"
+    }
+  }
+}

@@ -1,0 +1,52 @@
+# Virtual Environment
+venv/
+env/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Local Development Files (Don't upload to GitHub)
+local_server.py
+local_config.sh
+run_local.sh
+activate.sh
+test_local.sh
+requirements-local.txt
+
+# Mock Server (local testing only)
+mock-server/node_modules/
+mock-server/package-lock.json
+
+# API Keys and Secrets
+*.env
+.env.local
+.env.*.local
+local_config.sh
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Test files with hardcoded keys
+lambda/**/test_local.py
+lambda/**/test-real-api.sh
+
+# Mock server files
+mock-server/server.js
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
