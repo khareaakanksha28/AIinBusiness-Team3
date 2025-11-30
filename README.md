@@ -176,9 +176,6 @@ Update the API endpoint in `frontend/app.js` to point to your deployed backend.
 5. Push to the branch (`git push origin feature/amazing-feature`)
 6. Open a Pull Request
 
-## 📄 License
-
-[Your License Here]
 
 ## 🙏 Acknowledgments
 
@@ -186,7 +183,4 @@ Update the API endpoint in `frontend/app.js` to point to your deployed backend.
 - **FactoryTwin** for GraphQL API and manufacturing data
 - **Recharts** for data visualization
 
-## 📧 Contact
-
-[Your Contact Information]
 
