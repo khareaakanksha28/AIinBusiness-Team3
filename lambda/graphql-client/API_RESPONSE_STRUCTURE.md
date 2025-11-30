@@ -1,45 +1,5 @@
 # GraphQL API Response Structure
 
-## Working Query Example
-
-Your direct query that works:
-```graphql
-{
-  simulation(identifier: "4c386d0a-0133-4a66-aee0-1a8178ddabb1") {
-    charts {
-      demandByFulfillmentDonut(
-        from: "2025-01-01T00:00:00Z"
-        until: "2025-11-27T00:00:00Z"
-        sites: []
-        onTimeDeliveryBuffer: 0.0
-      ) {
-        stackDataList { name value }
-      }
-    }
-  }
-}
-```
-
-## Response Structure
-
-```json
-{
-  "data": {
-    "simulation": {
-      "charts": {
-        "demandByFulfillmentDonut": {
-          "stackDataList": [
-            {
-              "name": "Firm Order",
-              "value": 422132.05999999953
-            }
-          ]
-        }
-      }
-    }
-  }
-}
-```
 
 ## Lambda Query Structure
 
